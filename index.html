@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Training Log</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Training Log">
+<meta name="theme-color" content="#2E5E4E">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F4EF;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE7;
+  --surface3: #E8E4DC;
+  --border: rgba(0,0,0,0.09);
+  --border2: rgba(0,0,0,0.16);
+  --text: #1A1713;
+  --muted: #7A756D;
+  --muted2: #A39D94;
+  --accent: #2E5E4E;
+  --accent-l: #E1F0EB;
+  --accent-m: #5D9E87;
+  --accent2: #8B4513;
+  --accent2-l: #F5E6D8;
+  --danger: #A32D2D;
+  --danger-l: #FCEBEB;
+  --amber: #854F0B;
+  --amber-l: #FAEEDA;
+  --blue: #185FA5;
+  --blue-l: #E6F1FB;
+  --r: 14px;
+  --rs: 9px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:90px;overflow-x:hidden}
+
+/* ── Header ── */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px 0;position:sticky;top:0;z-index:100}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.hdr h1{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;letter-spacing:-0.4px}
+.week-chip{font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;background:var(--accent-l);color:var(--accent)}
+.nav{display:flex}
+.nav-btn{flex:1;background:none;border:none;border-bottom:2.5px solid transparent;padding:9px 2px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-btn.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── Pages ── */
+.pg{display:none;padding:16px}
+.pg.on{display:block}
+
+/* ── Cards ── */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:15px;margin-bottom:11px}
+.card-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Badges ── */
+.badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;display:inline-block}
+.b-green{background:var(--accent-l);color:var(--accent)}
+.b-amber{background:var(--amber-l);color:var(--amber)}
+.b-blue{background:var(--blue-l);color:var(--blue)}
+.b-red{background:var(--danger-l);color:var(--danger)}
+.b-brown{background:var(--accent2-l);color:var(--accent2)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;background:none;border:1px solid var(--border2);border-radius:var(--rs);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .12s;white-space:nowrap}
+.btn:active{opacity:.7;transform:scale(.97)}
+.btn-p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-d{color:var(--danger);border-color:rgba(163,45,45,.25)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-full{width:100%}
+.btn-ghost{border-color:transparent;color:var(--muted)}
+
+/* ── Forms ── */
+.fg{margin-bottom:13px}
+.lbl{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);appearance:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent-m);background:var(--surface)}
+textarea{resize:vertical;min-height:68px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A756D' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.row{display:flex;gap:10px}
+.row .fg{flex:1}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ── Stats grid ── */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:11px 8px;text-align:center}
+.stat-v{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--accent);display:block;line-height:1}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;display:block}
+
+/* ── Sectie header ── */
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;margin-top:4px}
+.sh-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600}
+
+/* ── Timer ── */
+.timer-wrap{background:var(--accent);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.timer-num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#fff;letter-spacing:2px}
+.timer-lbl{font-size:11px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.timer-schema{font-size:13px;font-weight:500;color:#fff}
+.kcal-badge{background:rgba(255,255,255,.18);border-radius:8px;padding:6px 10px;text-align:center}
+.kcal-val{font-size:16px;font-weight:700;color:#fff}
+.kcal-lbl{font-size:10px;color:rgba(255,255,255,.7)}
+
+/* ── Blok header ── */
+.blok-hdr{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+.blok-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.blok-a{background:var(--accent);color:#fff}
+.blok-b{background:var(--amber);color:#fff}
+.blok-c{background:var(--blue);color:#fff}
+.blok-d{background:var(--surface3);color:var(--muted)}
+.blok-info{font-size:13px;font-weight:500}
+.blok-sub{font-size:11px;color:var(--muted)}
+
+/* ── Sets tabel ── */
+.sets-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.sets-tbl th{color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:4px 4px;text-align:center;border-bottom:1px solid var(--border)}
+.sets-tbl td{padding:5px 4px;text-align:center;border-bottom:1px solid var(--border)}
+.sets-tbl tr:last-child td{border-bottom:none}
+.sets-tbl td:first-child{text-align:left;color:var(--muted);font-size:11px;width:28px}
+.sets-tbl input{width:56px;padding:6px 4px;font-size:14px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text)}
+.sets-tbl input:focus{border-color:var(--accent-m);background:var(--surface);outline:none}
+.prev-row td{background:var(--accent-l);color:var(--accent);font-size:11px;padding:4px}
+.done-set td{background:#f0faf6}
+.done-set .set-num{color:var(--accent)}
+
+/* ── Oefening card in sessie ── */
+.oef-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:13px;margin-bottom:9px}
+.oef-name{font-weight:500;font-size:15px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.oef-tag{font-size:10px;padding:2px 7px;border-radius:10px}
+
+/* ── Progressie chart ── */
+.prog-wrap{display:flex;align-items:flex-end;gap:3px;height:90px;margin:10px 0 4px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bar-inner{width:100%;border-radius:4px 4px 0 0;min-height:3px;transition:height .3s}
+.bar-dt{font-size:9px;color:var(--muted);text-align:center;line-height:1.2}
+.bar-vl{font-size:9px;font-weight:500;text-align:center}
+
+/* ── Spiergroep kleuren ── */
+.sg-borst .bar-inner{background:#D85A30}
+.sg-rug .bar-inner{background:#185FA5}
+.sg-armen .bar-inner{background:#854F0B}
+.sg-schouders .bar-inner{background:#533AB7}
+.sg-benen .bar-inner{background:#2E5E4E}
+.sg-borst .badge-sg{background:#FAECE7;color:#D85A30}
+.sg-rug .badge-sg{background:var(--blue-l);color:var(--blue)}
+.sg-armen .badge-sg{background:var(--amber-l);color:var(--amber)}
+.sg-schouders .badge-sg{background:#EEEDFE;color:#534AB7}
+.sg-benen .badge-sg{background:var(--accent-l);color:var(--accent)}
+
+/* ── Schema week overzicht ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px}
+.dag-cel{border-radius:8px;padding:6px 3px;text-align:center;border:1px solid var(--border)}
+.dag-lbl{font-size:9px;color:var(--muted);margin-bottom:3px}
+.dag-ico{font-size:14px;line-height:1}
+.dag-cel.has-sess{background:var(--accent-l);border-color:var(--accent-m)}
+.dag-cel.today{border-color:var(--accent);background:var(--accent)}
+.dag-cel.today .dag-lbl{color:rgba(255,255,255,.7)}
+.dag-cel.today .dag-ico{color:#fff}
+
+/* ── Modal ── */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-ov.on{display:flex}
+.modal{background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600}
+.x-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:4px;line-height:1}
+.drag-bar{width:36px;height:4px;border-radius:2px;background:var(--surface3);margin:0 auto 16px}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:22px;right:18px;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(46,94,78,.38);z-index:150;transition:transform .12s}
+.fab:active{transform:scale(.92)}
+
+/* ── Active banner ── */
+.act-banner{background:var(--accent);color:#fff;border-radius:var(--r);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.act-banner .btn{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:12px;padding:6px 12px}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* ── Pill selector ── */
+.pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pill{font-size:12px;padding:5px 11px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .12s}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── Feeling ── */
+.feel-row{display:flex;gap:7px;margin-top:6px}
+.feel-btn{flex:1;border:1px solid var(--border);border-radius:var(--rs);background:var(--surface2);padding:9px 4px;font-size:20px;text-align:center;cursor:pointer;transition:all .12s}
+.feel-btn.on{background:var(--accent-l);border-color:var(--accent-m)}
+
+/* ── History item ── */
+.hist-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-date{font-size:11px;color:var(--muted);margin-bottom:3px}
+.hist-name{font-weight:500;font-size:14px}
+.hist-meta{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Bibliotheek ── */
+.lib-sg-hdr{display:flex;align-items:center;gap:10px;padding:10px 0 6px;cursor:pointer;border-bottom:1px solid var(--border)}
+.lib-sg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.lib-sg-name{font-weight:500;font-size:14px;flex:1}
+.lib-oef-list{padding:6px 0 10px 20px}
+.lib-oef-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}
+.lib-oef-row.actief{color:var(--accent);font-weight:500}
+.lib-oef-row.reserve{color:var(--muted)}
+
+/* ── 6-weken progress ── */
+.zes-wk-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.zes-wk-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.zes-wk-dots{display:flex;gap:0}
+.wk-dot{flex:1;height:16px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted)}
+.wk-dot.done{color:var(--accent);font-weight:700}
+.wk-dot.cur{color:var(--accent2);font-weight:700}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty-ico{font-size:30px;margin-bottom:8px}
+.empty p{font-size:13px;line-height:1.6}
+
+/* ── Cardio blok ── */
+.cardio-row{display:flex;gap:10px;align-items:center;background:var(--surface2);border-radius:var(--rs);padding:10px 12px;margin-top:8px}
+.cardio-ico{font-size:20px}
+.cardio-info{flex:1}
+.cardio-lbl{font-size:12px;color:var(--muted)}
+.cardio-val{font-size:14px;font-weight:500}
+
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+.mt16{margin-top:16px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <h1>Training Log</h1>
+    <span class="week-chip" id="week-chip">Week —</span>
+  </div>
+  <div class="nav">
+    <button class="nav-btn on" onclick="goto('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="goto('sessie')">Sessie</button>
+    <button class="nav-btn" onclick="goto('schema')">Schema</button>
+    <button class="nav-btn" onclick="goto('progressie')">Progressie</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="pg on">
+  <div style="padding-top:14px"></div>
+  <div id="act-banner"></div>
+  <div id="dash-stats" class="stats"></div>
+  <div id="zes-wk-blok"></div>
+  <div class="sh"><span class="sh-title">Recente trainingen</span></div>
+  <div id="hist-list"></div>
+  <div style="display:flex;gap:8px;margin-top:8px;padding-bottom:4px">
+    <button class="btn btn-full" style="font-size:12px;padding:10px" onclick="exportData()">⬇ Backup downloaden</button>
+    <button class="btn btn-full" style="font-size:12px;padding:10px" onclick="importData()">⬆ Backup terugzetten</button>
+  </div>
+</div>
+
+<!-- SESSIE -->
+<div id="pg-sessie" class="pg">
+  <div style="padding-top:14px"></div>
+  <div id="sessie-wrap"></div>
+</div>
+
+<!-- SCHEMA -->
+<div id="pg-schema" class="pg">
+  <div style="padding-top:14px"></div>
+  <div class="sh"><span class="sh-title">Oefeningen bibliotheek</span><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="migreerArmen()">🔄 Armen samenvoegen</button><button class="btn btn-sm btn-p" onclick="openBibModal()">Beheer</button></div></div>
+  <div id="bib-view"></div>
+  <div class="sh mt16"><span class="sh-title">Mijn schema's</span><button class="btn btn-sm btn-p" onclick="openSchemaModal()">+ Nieuw</button></div>
+  <div id="schema-list"></div>
+</div>
+
+<!-- PROGRESSIE -->
+<div id="pg-progressie" class="pg">
+  <div style="padding-top:14px"></div>
+  <div class="fg">
+    <label class="lbl">Spiergroep</label>
+    <select id="prog-sg" onchange="progFilterSg()">
+      <option value="">Alle oefeningen</option>
+      <option>borst</option><option>rug</option><option>armen</option><option>schouders</option><option>benen</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label class="lbl">Oefening</label>
+    <select id="prog-oef" onchange="renderProg()"><option value="">— selecteer —</option></select>
+  </div>
+  <div id="prog-out"></div>
+</div>
+
+<button class="fab" id="fab" onclick="fabClick()">+</button>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Start sessie -->
+<div class="modal-ov" id="m-start">
+  <div class="modal">
+    <div class="drag-bar"></div>
+    <div class="modal-hd"><span class="modal-title">Training starten</span><button class="x-btn" onclick="close_m('m-start')">✕</button></div>
+    <div id="start-list"></div>
+  </div>
+</div>
+
+<!-- Sessie afronden -->
+<div class="modal-ov" id="m-eind">
+  <div class="modal">
+    <div class="drag-bar"></div>
+    <div class="modal-hd"><span class="modal-title">Sessie afronden</span><button class="x-btn" onclick="close_m('m-eind')">✕</button></div>
+    <div class="fg">
+      <label class="lbl">Gevoel</label>
+      <div class="feel-row" id="feel-row">
+        <div class="feel-btn" data-v="1" onclick="setFeel(1)">😓</div>
+        <div class="feel-btn" data-v="2" onclick="setFeel(2)">😐</div>
+        <div class="feel-btn" data-v="3" onclick="setFeel(3)">🙂</div>
+        <div class="feel-btn" data-v="4" onclick="setFeel(4)">💪</div>
+        <div class="feel-btn" data-v="5" onclick="setFeel(5)">🔥</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Cardio afsluiting</label>
+      <div class="row">
+        <div class="fg"><label class="lbl">Minuten</label><input type="number" id="cardio-min" placeholder="15" inputmode="numeric"></div>
+        <div class="fg"><label class="lbl">Type</label>
+          <select id="cardio-type">
+            <option>loopband</option><option>crosstrainer</option><option>fiets</option><option>roeien</option><option>anders</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Notities</label>
+      <textarea id="eind-notitie" placeholder="Hoe ging de training?"></textarea>
+    </div>
+    <button class="btn btn-p btn-full" style="padding:13px;font-size:15px" onclick="finishSessie()">Sessie opslaan</button>
+  </div>
+</div>
+
+<!-- Schema aanmaken -->
+<div class="modal-ov" id="m-schema">
+  <div class="modal">
+    <div class="drag-bar"></div>
+    <div class="modal-hd"><span class="modal-title" id="m-schema-title">Nieuw schema</span><button class="x-btn" onclick="close_m('m-schema')">✕</button></div>
+    <div class="fg">
+      <label class="lbl">Schema naam</label>
+      <input type="text" id="s-naam" placeholder="bijv. Borst — Schema A">
+    </div>
+    <div class="fg">
+      <label class="lbl">Spiergroep</label>
+      <select id="s-sg" onchange="loadSgOefs()">
+        <option value="">Kies spiergroep</option>
+        <option>borst</option><option>rug</option><option>armen</option><option>schouders</option><option>benen</option>
+      </select>
+    </div>
+    <div id="s-oef-blok" style="display:none">
+      <label class="lbl" style="margin-bottom:8px">Oefeningen — selecteer 6 actief</label>
+      <div id="s-oef-lijst"></div>
+      <div class="fg mt12">
+        <label class="lbl">Blok A (4 sets × 10-12) — 2 oefeningen</label>
+        <div id="s-blok-a"></div>
+      </div>
+      <div class="fg mt8">
+        <label class="lbl">Blok B (3 sets × 10-12) — 2 oefeningen</label>
+        <div id="s-blok-b"></div>
+      </div>
+      <div class="fg mt8">
+        <label class="lbl">Blok C (3 sets × 10-12) — 2 oefeningen</label>
+        <div id="s-blok-c"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Startdatum 6-weken cyclus</label>
+      <input type="date" id="s-start">
+    </div>
+    <button class="btn btn-p btn-full mt8" onclick="saveSchema()">Opslaan</button>
+    <div id="s-del-wrap" style="margin-top:9px"></div>
+    <input type="hidden" id="s-edit-id">
+  </div>
+</div>
+
+<!-- Bibliotheek beheer -->
+<div class="modal-ov" id="m-bib">
+  <div class="modal">
+    <div class="drag-bar"></div>
+    <div class="modal-hd"><span class="modal-title">Oefeningen beheren</span><button class="x-btn" onclick="close_m('m-bib')">✕</button></div>
+    <div class="fg">
+      <label class="lbl">Spiergroep</label>
+      <select id="bib-sg" onchange="renderBibEditor()">
+        <option>borst</option><option>rug</option><option>armen</option><option>schouders</option><option>benen</option>
+      </select>
+    </div>
+    <div id="bib-editor"></div>
+    <div class="fg mt8" style="display:flex;gap:8px">
+      <input type="text" id="bib-new" placeholder="Nieuwe oefening..." style="flex:1">
+      <button class="btn btn-p" onclick="addBibOef()">+</button>
+    </div>
+    <button class="btn btn-full mt8" onclick="close_m('m-bib');renderBib();renderSchemaPage()">Klaar</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA & STORAGE
+═══════════════════════════════════════════ */
+const KEY = 'training_v2';
+function loadDB(){try{return JSON.parse(localStorage.getItem(KEY))||defDB()}catch{return defDB()}}
+function saveDB(){localStorage.setItem(KEY,JSON.stringify(db))}
+function defDB(){
+  return {
+    schemas:[],
+    sessions:[],
+    bibliotheek:{
+      borst:['Bench press','Reverse grip press dumb-bells','Chest press 1 1/4','Chest fly','Close grip press','Wide fly','Low fly inclined','Chest slide inclined'],
+      rug:['Lat pull','Back squeeze','Supinated row','Bent over row','Back fly','Y-raise','Drag shrug','90 hold back squeeze','Gorilla row'],
+      armen:[
+        'Zottman curl','Alternating hammer curl','Drag curl','Cross body curl',
+        'Reverse grip curl','Curl','Hammer curl','Concentration curl',
+        'Triceps push down bar','Triceps push down rope','Triceps overhead rope extension',
+        'Triceps push down handle overhand','Triceps pull down handle underhand',
+        'Triceps dips bench','Diamond push ups'
+      ],
+      schouders:['Bradford press','Scott press','Shrugs','Around the world','Upright row','Punch out','Tip out','T-raise','Arnold press'],
+      benen:['Squatten','Calf raise standing','Leg extension','Hip abductor','Hip adductor','Walking lunge','Seated leg curl']
+    }
+  }
+}
+let db = loadDB();
+let actSess = null;
+let timerInt = null, timerSec = 0;
+let feelVal = 3;
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+const pages = ['dashboard','sessie','schema','progressie'];
+function goto(p){
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-'+p).classList.add('on');
+  document.querySelectorAll('.nav-btn')[pages.indexOf(p)].classList.add('on');
+  document.getElementById('fab').style.display = p==='schema'?'none':'flex';
+  document.getElementById('fab').textContent = actSess ? '⏹' : '+';
+  if(p==='dashboard') renderDash();
+  if(p==='sessie') renderSessie();
+  if(p==='schema') renderSchemaPage();
+  if(p==='progressie') renderProgPage();
+  setWeekChip();
+}
+function fabClick(){if(actSess)goto('sessie');else openStartModal()}
+
+/* Week chip */
+function setWeekChip(){
+  const now=new Date(), d=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
+  const dow=d.getUTCDay()||7; d.setUTCDate(d.getUTCDate()+4-dow);
+  const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const wk=Math.ceil((((d-y)/86400000)+1)/7);
+  document.getElementById('week-chip').textContent='Week '+wk;
+}
+
+/* ═══════════════════════════════════════════
+   BIBLIOTHEEK
+═══════════════════════════════════════════ */
+const sgColors={borst:'#D85A30',rug:'#185FA5',armen:'#854F0B',schouders:'#534AB7',benen:'#2E5E4E'};
+const sgList=['borst','rug','armen','schouders','benen'];
+
+function renderBib(){
+  const el=document.getElementById('bib-view');
+  let html='';
+  sgList.forEach(sg=>{
+    const oefs=db.bibliotheek[sg]||[];
+    html+=`<div class="card" style="padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${sgColors[sg]};flex-shrink:0"></div>
+        <span style="font-weight:500;font-size:14px">${sg}</span>
+
+        <span class="badge b-green" style="margin-left:auto">${oefs.length} oef.</span>
+      </div>
+      <div class="pill-row">${oefs.slice(0,5).map(o=>`<span class="pill">${o}</span>`).join('')}${oefs.length>5?`<span class="pill">+${oefs.length-5}</span>`:''}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function openBibModal(){
+  document.getElementById('bib-sg').value='borst';
+  renderBibEditor();
+  open_m('m-bib');
+}
+
+function renderBibEditor(){
+  const sg=document.getElementById('bib-sg').value;
+  const oefs=db.bibliotheek[sg]||[];
+  document.getElementById('bib-editor').innerHTML=oefs.map((o,i)=>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:14px">${o}</span>
+      <button class="btn btn-sm btn-d" onclick="delBibOef('${sg}',${i})">✕</button>
+    </div>`
+  ).join('')||'<p style="color:var(--muted);font-size:13px;padding:8px 0">Nog geen oefeningen.</p>';
+}
+
+function addBibOef(){
+  const sg=document.getElementById('bib-sg').value;
+  const v=document.getElementById('bib-new').value.trim();
+  if(!v)return;
+  if(!db.bibliotheek[sg])db.bibliotheek[sg]=[];
+  db.bibliotheek[sg].push(v);
+  saveDB();
+  document.getElementById('bib-new').value='';
+  renderBibEditor();
+}
+
+function delBibOef(sg,i){
+  db.bibliotheek[sg].splice(i,1);
+  saveDB();
+  renderBibEditor();
+}
+
+/* ═══════════════════════════════════════════
+   SCHEMA's
+═══════════════════════════════════════════ */
+function renderSchemaPage(){renderBib();renderSchemas()}
+
+function renderSchemas(){
+  const el=document.getElementById('schema-list');
+  if(!db.schemas.length){el.innerHTML=`<div class="empty"><div class="empty-ico">📋</div><p>Nog geen schema's.<br>Maak je eerste schema aan.</p></div>`;return}
+  el.innerHTML=db.schemas.map(s=>{
+    const cnt=db.sessions.filter(x=>x.schemaId===s.id).length;
+    const [pct,wkNr]=cyclePct(s);
+    return `<div class="card" onclick="openSchemaModal('${s.id}')">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">${s.naam}</div>
+          <div class="card-sub" style="text-transform:capitalize">${s.spiergroep} · ${(s.blokA||[]).length+(s.blokB||[]).length+(s.blokC||[]).length} oefeningen</div>
+        </div>
+        <div style="text-align:right">
+          <span class="badge b-green">${cnt}x</span>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">wk ${wkNr}/6</div>
+        </div>
+      </div>
+      <div class="zes-wk-bar"><div class="zes-wk-fill" style="width:${pct}%"></div></div>
+      <div class="zes-wk-dots">${[1,2,3,4,5,6].map(w=>`<div class="wk-dot${w<wkNr?' done':w===wkNr?' cur':''}">${w}</div>`).join('')}</div>
+      <div class="pill-row mt8">
+        ${[...(s.blokA||[]),...(s.blokB||[]),...(s.blokC||[])].map(o=>`<span class="pill">${o}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cyclePct(s){
+  if(!s.startDatum)return[0,1];
+  const diff=Math.floor((Date.now()-new Date(s.startDatum).getTime())/(1000*60*60*24*7));
+  const wk=Math.min(Math.max(diff+1,1),6);
+  return[Math.round((wk/6)*100),wk];
+}
+
+/* ── Schema modal ── */
+let sSelActief=[];
+function openSchemaModal(id){
+  sSelActief=[];
+  document.getElementById('s-naam').value='';
+  document.getElementById('s-sg').value='';
+  document.getElementById('s-oef-blok').style.display='none';
+  document.getElementById('s-edit-id').value='';
+  document.getElementById('s-del-wrap').innerHTML='';
+  document.getElementById('m-schema-title').textContent='Nieuw schema';
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('s-start').value=today;
+
+  if(id){
+    const s=db.schemas.find(x=>x.id===id);
+    if(s){
+      document.getElementById('s-naam').value=s.naam;
+      document.getElementById('s-sg').value=s.spiergroep;
+      document.getElementById('s-start').value=s.startDatum||today;
+      document.getElementById('s-edit-id').value=id;
+      document.getElementById('m-schema-title').textContent='Schema bewerken';
+      document.getElementById('s-del-wrap').innerHTML=`<button class="btn btn-d btn-full" onclick="delSchema('${id}')">Schema verwijderen</button>`;
+      sSelActief=[...(s.blokA||[]),...(s.blokB||[]),...(s.blokC||[])];
+      loadSgOefs(s.blokA,s.blokB,s.blokC);
+    }
+  }
+  open_m('m-schema');
+}
+
+function loadSgOefs(blokA,blokB,blokC){
+  const sg=document.getElementById('s-sg').value;
+  if(!sg)return;
+  const oefs=db.bibliotheek[sg]||[];
+  const blok=document.getElementById('s-oef-blok');
+  blok.style.display='block';
+
+  // Oefening checkboxes
+  document.getElementById('s-oef-lijst').innerHTML=oefs.map(o=>
+    `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+      <input type="checkbox" id="ck-${slugify(o)}" value="${o}" onchange="updateBlokSelects()" ${sSelActief.includes(o)?'checked':''} style="width:18px;height:18px;accent-color:var(--accent)">
+      <label for="ck-${slugify(o)}" style="font-size:14px;cursor:pointer;flex:1">${o}</label>
+    </div>`
+  ).join('');
+
+  renderBlokSelects(blokA,blokB,blokC);
+}
+
+function updateBlokSelects(){
+  sSelActief=[...document.querySelectorAll('#s-oef-lijst input:checked')].map(x=>x.value);
+  renderBlokSelects();
+}
+
+function renderBlokSelects(blokA,blokB,blokC){
+  const actief=sSelActief.length?sSelActief:[...(blokA||[]),...(blokB||[]),...(blokC||[])];
+  ['a','b','c'].forEach((ltr,bi)=>{
+    const presel=(ltr==='a'?blokA:ltr==='b'?blokB:blokC)||[];
+    const wrap=document.getElementById('s-blok-'+ltr);
+    wrap.innerHTML=[0,1].map(slot=>{
+      const cur=presel[slot]||'';
+      return `<select style="margin-bottom:6px" id="blok-${ltr}-${slot}">
+        <option value="">— kies oefening —</option>
+        ${actief.map(o=>`<option value="${o}"${o===cur?' selected':''}>${o}</option>`).join('')}
+      </select>`;
+    }).join('');
+  });
+}
+
+function saveSchema(){
+  const naam=document.getElementById('s-naam').value.trim();
+  const sg=document.getElementById('s-sg').value;
+  if(!naam||!sg){alert('Naam en spiergroep zijn verplicht.');return}
+  const blokA=[0,1].map(i=>document.getElementById('blok-a-'+i)?.value||'').filter(Boolean);
+  const blokB=[0,1].map(i=>document.getElementById('blok-b-'+i)?.value||'').filter(Boolean);
+  const blokC=[0,1].map(i=>document.getElementById('blok-c-'+i)?.value||'').filter(Boolean);
+  const startDatum=document.getElementById('s-start').value;
+  const editId=document.getElementById('s-edit-id').value;
+
+  const schema={naam,spiergroep:sg,blokA,blokB,blokC,startDatum};
+  if(editId){const i=db.schemas.findIndex(x=>x.id===editId);if(i>=0)db.schemas[i]={...db.schemas[i],...schema}}
+  else db.schemas.push({id:'sc'+Date.now(),...schema});
+  saveDB();close_m('m-schema');renderSchemaPage();
+}
+
+function delSchema(id){if(!confirm('Schema verwijderen?'))return;db.schemas=db.schemas.filter(x=>x.id!==id);saveDB();close_m('m-schema');renderSchemaPage()}
+
+/* ═══════════════════════════════════════════
+   SESSIE STARTEN
+═══════════════════════════════════════════ */
+function openStartModal(){
+  const el=document.getElementById('start-list');
+  if(!db.schemas.length){el.innerHTML=`<p style="color:var(--muted);font-size:14px;text-align:center;padding:16px">Maak eerst een schema aan via het Schema-tabblad.</p>`;open_m('m-start');return}
+  el.innerHTML=db.schemas.map(s=>`
+    <div onclick="startSessie('${s.id}')" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer">
+      <div style="width:38px;height:38px;border-radius:10px;background:${sgColors[s.spiergroep]||'#888'}22;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💪</div>
+      <div style="flex:1">
+        <div style="font-weight:500;font-size:14px">${s.naam}</div>
+        <div style="font-size:12px;color:var(--muted);text-transform:capitalize">${s.spiergroep} · ${(s.blokA||[]).length+(s.blokB||[]).length+(s.blokC||[]).length} oefeningen</div>
+      </div>
+      <span style="color:var(--muted);font-size:20px">›</span>
+    </div>`).join('');
+  open_m('m-start');
+}
+
+function startSessie(schemaId){
+  close_m('m-start');
+  const s=db.schemas.find(x=>x.id===schemaId);
+  actSess={schemaId,schemaNaam:s.naam,spiergroep:s.spiergroep,blokA:s.blokA,blokB:s.blokB,blokC:s.blokC,startTime:Date.now(),sets:{},cardioMin:0,cardioType:'loopband',gevoel:3,notitie:''};
+  [...(s.blokA||[]),...(s.blokB||[]),...(s.blokC||[])].forEach(o=>{actSess.sets[o]=[]});
+  timerSec=0;clearInterval(timerInt);timerInt=setInterval(()=>{timerSec++;updTimer()},1000);
+  goto('sessie');
+}
+
+/* ═══════════════════════════════════════════
+   SESSIE RENDEREN
+═══════════════════════════════════════════ */
+function renderSessie(){
+  const el=document.getElementById('sessie-wrap');
+  if(!actSess){el.innerHTML=`<div class="empty"><div class="empty-ico">🏋️</div><p>Geen actieve training.<br>Druk op + om te starten.</p></div>`;return}
+
+  const kcal=estimateKcal();
+  let html=`<div class="timer-wrap">
+    <div>
+      <div class="timer-lbl">Duur</div>
+      <div class="timer-num" id="timer-num">00:00</div>
+      <div class="timer-schema">${actSess.schemaNaam}</div>
+    </div>
+    <div class="kcal-badge">
+      <div class="kcal-val" id="kcal-val">${kcal}</div>
+      <div class="kcal-lbl">kcal ~</div>
+    </div>
+  </div>`;
+
+  // Blokken
+  const blokken=[
+    {ltr:'A',sets:4,oefs:actSess.blokA||[],cls:'blok-a',info:'4 sets × 10-12 reps'},
+    {ltr:'B',sets:3,oefs:actSess.blokB||[],cls:'blok-b',info:'3 sets × 10-12 reps'},
+    {ltr:'C',sets:3,oefs:actSess.blokC||[],cls:'blok-c',info:'3 sets × 10-12 reps'},
+  ];
+
+  blokken.forEach(blok=>{
+    if(!blok.oefs.length)return;
+    html+=`<div class="blok-hdr"><div class="blok-num ${blok.cls}">${blok.ltr}</div><div><div class="blok-info">Blok ${blok.ltr}</div><div class="blok-sub">${blok.info}</div></div></div>`;
+    blok.oefs.forEach(oef=>{
+      const sets=actSess.sets[oef]||[];
+      const prev=getPrev(oef);
+      const sid=slugify(oef);
+      html+=`<div class="oef-card">
+        <div class="oef-name">${oef}
+          <button class="btn btn-sm" onclick="addSet('${esc(oef)}',${blok.sets})">+ Set</button>
+        </div>
+        <table class="sets-tbl">
+          <thead><tr><th>#</th><th>Kg</th><th>Reps</th><th></th></tr></thead>
+          <tbody id="tb-${sid}">
+            ${prev?`<tr class="prev-row"><td colspan="4">Vorige: ${prev}</td></tr>`:''}
+            ${sets.map((s,i)=>`<tr>
+              <td class="set-num">${i+1}</td>
+              <td><input type="number" inputmode="decimal" step="0.5" value="${s.kg||''}" placeholder="—" onchange="updSet('${esc(oef)}',${i},'kg',this.value)"></td>
+              <td><input type="number" inputmode="numeric" value="${s.reps||''}" placeholder="—" onchange="updSet('${esc(oef)}',${i},'reps',this.value)"></td>
+              <td><button class="btn btn-ghost btn-sm" onclick="delSet('${esc(oef)}',${i})">✕</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    });
+  });
+
+  html+=`<div class="card" style="border-style:dashed;background:transparent;margin-top:8px">
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)">
+      <span style="font-size:20px">🏃</span>
+      <span>Cardio afsluiting instellen bij afronden</span>
+    </div>
+  </div>
+  <button class="btn btn-p btn-full mt12" style="padding:14px;font-size:15px" onclick="openEind()">Training afronden ›</button>`;
+
+  el.innerHTML=html;
+  updTimer();
+}
+
+function esc(s){return s.replace(/'/g,"\\'")}
+function slugify(s){return s.replace(/[^a-zA-Z0-9]/g,'_')}
+
+function addSet(oef,maxSets){
+  const cur=(actSess.sets[oef]||[]).length;
+  if(!actSess.sets[oef])actSess.sets[oef]=[];
+  const prev=getPrevSets(oef);
+  const prevSet=prev[cur]||prev[prev.length-1]||{};
+  actSess.sets[oef].push({kg:prevSet.kg||'',reps:prevSet.reps||''});
+  renderSessie();
+}
+function delSet(oef,i){actSess.sets[oef].splice(i,1);renderSessie()}
+function updSet(oef,i,f,v){if(actSess.sets[oef])actSess.sets[oef][i][f]=v;updKcal()}
+
+function getPrev(oef){
+  const prev=db.sessions.slice().reverse().find(s=>s.sets&&s.sets[oef]&&s.sets[oef].length);
+  if(!prev)return null;
+  const s=prev.sets[oef];const last=s[s.length-1];
+  return `${s.length}x ${last.kg||'—'}kg × ${last.reps||'—'} reps`;
+}
+function getPrevSets(oef){
+  const prev=db.sessions.slice().reverse().find(s=>s.sets&&s.sets[oef]&&s.sets[oef].length);
+  return prev?prev.sets[oef]:[];
+}
+
+/* ── Kalorie schatting ── */
+function estimateKcal(){
+  // ~5 kcal/min krachtraining + 7 kcal/min cardio, ruwe schatting
+  const trainMin=Math.round(timerSec/60);
+  return Math.round(trainMin*5);
+}
+function updKcal(){const el=document.getElementById('kcal-val');if(el)el.textContent=estimateKcal()}
+
+function updTimer(){
+  const el=document.getElementById('timer-num');
+  if(!el)return;
+  const h=Math.floor(timerSec/3600),m=Math.floor((timerSec%3600)/60),s=timerSec%60;
+  el.textContent=h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`;
+  updKcal();
+}
+function pad(n){return String(n).padStart(2,'0')}
+
+/* ═══════════════════════════════════════════
+   SESSIE AFRONDEN
+═══════════════════════════════════════════ */
+function openEind(){
+  feelVal=3;
+  document.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.feel-btn[data-v="3"]').classList.add('on');
+  document.getElementById('eind-notitie').value='';
+  document.getElementById('cardio-min').value='15';
+  open_m('m-eind');
+}
+function setFeel(v){feelVal=v;document.querySelectorAll('.feel-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)===v))}
+
+function finishSessie(){
+  if(!actSess)return;
+  clearInterval(timerInt);
+  const cardioMin=parseInt(document.getElementById('cardio-min').value)||0;
+  const cardioType=document.getElementById('cardio-type').value;
+  const cardioKcal=Math.round(cardioMin*7);
+  const trainKcal=estimateKcal();
+
+  const sess={
+    id:'sess'+Date.now(),datum:new Date().toISOString(),
+    schemaId:actSess.schemaId,schemaNaam:actSess.schemaNaam,spiergroep:actSess.spiergroep,
+    duur:timerSec,sets:actSess.sets,
+    cardioMin,cardioType,
+    kcal:trainKcal+cardioKcal,
+    gevoel:feelVal,notitie:document.getElementById('eind-notitie').value.trim()
+  };
+  db.sessions.push(sess);saveDB();
+  actSess=null;timerSec=0;
+  close_m('m-eind');
+  document.getElementById('fab').textContent='+';
+  goto('dashboard');
+}
+
+/* ═══════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════ */
+function renderDash(){
+  const all=db.sessions;
+  const now=new Date();
+  const thisWk=all.filter(s=>(now-new Date(s.datum))<7*24*3600*1000);
+  const totKcal=all.reduce((a,s)=>a+(s.kcal||0),0);
+
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat"><span class="stat-v">${all.length}</span><span class="stat-l">Totaal sessies</span></div>
+    <div class="stat"><span class="stat-v">${thisWk.length}</span><span class="stat-l">Deze week</span></div>
+    <div class="stat"><span class="stat-v">${Math.round(totKcal/1000*10)/10}k</span><span class="stat-l">kcal verbrand</span></div>`;
+
+  // Active banner
+  const ab=document.getElementById('act-banner');
+  if(actSess)ab.innerHTML=`<div class="act-banner"><div><div style="font-size:11px;opacity:.75">Actieve training</div><div style="font-weight:500">${actSess.schemaNaam}</div></div><button class="btn btn-sm" onclick="goto('sessie')">Ga verder ›</button></div>`;
+  else ab.innerHTML='';
+
+  // 6-weken blok
+  const zwEl=document.getElementById('zes-wk-blok');
+  if(db.schemas.length){
+    const s=db.schemas[0];
+    const [pct,wkNr]=cyclePct(s);
+    zwEl.innerHTML=`<div class="card" style="margin-bottom:14px">
+      <div class="card-hd"><div><div class="card-title" style="font-size:14px">6-weken cyclus</div><div class="card-sub">${s.naam}</div></div><span class="badge b-amber">Week ${wkNr}/6</span></div>
+      <div class="zes-wk-bar"><div class="zes-wk-fill" style="width:${pct}%"></div></div>
+      <div class="zes-wk-dots">${[1,2,3,4,5,6].map(w=>`<div class="wk-dot${w<wkNr?' done':w===wkNr?' cur':''}">${w}</div>`).join('')}</div>
+    </div>`;
+  }else zwEl.innerHTML='';
+
+  // Recent
+  const histEl=document.getElementById('hist-list');
+  if(!all.length){histEl.innerHTML=`<div class="empty"><div class="empty-ico">📊</div><p>Nog geen trainingen.<br>Druk op + om te starten.</p></div>`;return}
+  const feel=['','😓','😐','🙂','💪','🔥'];
+  histEl.innerHTML=all.slice().reverse().slice(0,8).map(s=>{
+    const d=new Date(s.datum).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'});
+    const dur=fmtDur(s.duur);
+    return `<div class="card" style="padding:13px 14px">
+      <div class="hist-date">${d}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="hist-name">${s.schemaNaam}</div>
+          <div class="hist-meta">${dur}${s.kcal?` · ${s.kcal} kcal`:''}${s.cardioMin?` · 🏃 ${s.cardioMin}m ${s.cardioType}`:''}${s.gevoel?' · '+feel[s.gevoel]:''}</div>
+          ${s.notitie?`<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${s.notitie}"</div>`:''}
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="delSess('${s.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function delSess(id){if(!confirm('Sessie verwijderen?'))return;db.sessions=db.sessions.filter(s=>s.id!==id);saveDB();renderDash()}
+function fmtDur(s){const m=Math.round(s/60);return m>=60?`${Math.floor(m/60)}u ${m%60}m`:`${m} min`}
+
+/* ═══════════════════════════════════════════
+   PROGRESSIE
+═══════════════════════════════════════════ */
+function renderProgPage(){
+  progFilterSg();
+}
+
+function progFilterSg(){
+  const sg=document.getElementById('prog-sg').value;
+  const oefSet=new Set();
+  db.sessions.forEach(s=>{
+    if(sg&&s.spiergroep!==sg)return;
+    Object.keys(s.sets||{}).forEach(o=>oefSet.add(o));
+  });
+  const sel=document.getElementById('prog-oef');
+  sel.innerHTML='<option value="">— selecteer oefening —</option>'+[...oefSet].sort().map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('prog-out').innerHTML='';
+}
+
+function renderProg(){
+  const oef=document.getElementById('prog-oef').value;
+  const el=document.getElementById('prog-out');
+  if(!oef){el.innerHTML='';return}
+
+  const data=db.sessions
+    .filter(s=>s.sets&&s.sets[oef]&&s.sets[oef].length)
+    .map(s=>{
+      const sets=s.sets[oef];
+      const maxKg=Math.max(...sets.map(x=>parseFloat(x.kg)||0));
+      const vol=sets.reduce((a,x)=>a+(parseFloat(x.kg)||0)*(parseInt(x.reps)||0),0);
+      const d=new Date(s.datum);
+      return{dt:d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'}),maxKg,vol:Math.round(vol),sets,datum:d};
+    });
+
+  if(!data.length){el.innerHTML=`<div class="empty"><p>Nog geen data voor<br><strong>${oef}</strong></p></div>`;return}
+
+  const maxKg=Math.max(...data.map(d=>d.maxKg))||1;
+  const maxVol=Math.max(...data.map(d=>d.vol))||1;
+  const sg=db.sessions.find(s=>s.sets&&s.sets[oef])?.spiergroep||'borst';
+  const barClr=sgColors[sg]||'var(--accent)';
+
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Max gewicht</div><span class="badge b-green">${data[data.length-1].maxKg} kg</span></div>
+      <div class="prog-wrap">
+        ${data.slice(-8).map(d=>{const h=Math.round((d.maxKg/maxKg)*78);return`<div class="bar-col"><div class="bar-vl" style="color:${barClr};font-size:9px">${d.maxKg}</div><div class="bar-inner" style="height:${h}px;background:${barClr}"></div><div class="bar-dt">${d.dt}</div></div>`}).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Volume (kg × reps)</div><span class="badge b-blue">${data[data.length-1].vol}</span></div>
+      <div class="prog-wrap">
+        ${data.slice(-8).map(d=>{const h=Math.round((d.vol/maxVol)*78);return`<div class="bar-col"><div class="bar-vl" style="color:${barClr};font-size:9px">${d.vol}</div><div class="bar-inner" style="height:${h}px;background:${barClr}88"></div><div class="bar-dt">${d.dt}</div></div>`}).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">Recente sets</div>
+      ${data.slice().reverse().slice(0,4).map(d=>`
+        <div class="hist-item">
+          <div class="hist-date">${d.dt}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">
+            ${d.sets.map((s,i)=>`<span class="badge b-green">${i+1}: ${s.kg||'—'}kg×${s.reps||'—'}</span>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   BACKUP & RESTORE
+═══════════════════════════════════════════ */
+function exportData(){
+  const payload={exportDatum:new Date().toISOString(),versie:'v2',data:{schemas:db.schemas,sessions:db.sessions}};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const datum=new Date().toISOString().split('T')[0];
+  a.href=url;a.download='training-backup-'+datum+'.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('Backup gedownload ✓');
+}
+
+function importData(){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='.json';
+  inp.onchange=function(e){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const parsed=JSON.parse(ev.target.result);
+        if(!parsed.data||!parsed.versie)throw new Error('Ongeldig');
+        const d=parsed.exportDatum?parsed.exportDatum.split('T')[0]:'onbekend';
+        if(!confirm('Backup van '+d+' terugzetten?\n\nJe huidige data wordt overschreven.'))return;
+        db.schemas=parsed.data.schemas||[];
+        db.sessions=parsed.data.sessions||[];
+        saveDB();
+        showToast('Backup teruggezet ✓');
+        renderDash();
+      }catch(err){alert('Kon backup niet lezen. Controleer het bestand.')}
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1A1713;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.25)';
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove()},2500);
+}
+
+/* ═══════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════ */
+function open_m(id){document.getElementById(id).classList.add('on')}
+function close_m(id){document.getElementById(id).classList.remove('on')}
+
+/* ── Migratie ── */
+function migreerArmen(){
+  let changed=false;
+  const bic=db.bibliotheek['armen (biceps)'];
+  const tri=db.bibliotheek['armen (triceps)'];
+  if(bic||tri){
+    if(!db.bibliotheek['armen'])db.bibliotheek['armen']=[];
+    if(bic)bic.forEach(o=>{if(!db.bibliotheek['armen'].includes(o))db.bibliotheek['armen'].push(o)});
+    if(tri)tri.forEach(o=>{if(!db.bibliotheek['armen'].includes(o))db.bibliotheek['armen'].push(o)});
+    delete db.bibliotheek['armen (biceps)'];
+    delete db.bibliotheek['armen (triceps)'];
+    changed=true;
+  }
+  if(changed){saveDB();showToast('Armen oefeningen samengevoegd ✓');renderSchemaPage();}
+  else{showToast('Niets te migreren — al up to date ✓');}
+}
+
+/* ── Init ── */
+setWeekChip();
+renderDash();
+</script>
+</body>
+</html>
