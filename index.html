@@ -268,7 +268,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <!-- SCHEMA -->
 <div id="pg-schema" class="pg">
   <div style="padding-top:14px"></div>
-  <div class="sh"><span class="sh-title">Oefeningen bibliotheek</span><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="migreerArmen()">🔄 Armen samenvoegen</button><button class="btn btn-sm btn-p" onclick="openBibModal()">Beheer</button></div></div>
+  <div class="sh"><span class="sh-title">Oefeningen bibliotheek</span><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="migreerBibliotheek()">🔄 Update</button><button class="btn btn-sm btn-p" onclick="openBibModal()">Beheer</button></div></div>
   <div id="bib-view"></div>
   <div class="sh mt16"><span class="sh-title">Mijn schema's</span><button class="btn btn-sm btn-p" onclick="openSchemaModal()">+ Nieuw</button></div>
   <div id="schema-list"></div>
@@ -655,10 +655,9 @@ function openStartModal(){
 function startSessie(schemaId){
   close_m('m-start');
   const s=db.schemas.find(x=>x.id===schemaId);
-  const now=Date.now();
-  actSess={schemaId,schemaNaam:s.naam,spiergroep:s.spiergroep,blokA:s.blokA,blokB:s.blokB,blokC:s.blokC,startTime:now,sets:{},cardioMin:0,cardioType:'loopband',gevoel:3,notitie:''};
+  actSess={schemaId,schemaNaam:s.naam,spiergroep:s.spiergroep,blokA:s.blokA,blokB:s.blokB,blokC:s.blokC,startTime:Date.now(),sets:{},cardioMin:0,cardioType:'loopband',gevoel:3,notitie:''};
   [...(s.blokA||[]),...(s.blokB||[]),...(s.blokC||[])].forEach(o=>{actSess.sets[o]=[]});
-  clearInterval(timerInt);timerInt=setInterval(()=>{updTimer()},1000);
+  timerSec=0;clearInterval(timerInt);timerInt=setInterval(()=>{timerSec++;updTimer()},1000);
   goto('sessie');
 }
 
@@ -791,12 +790,11 @@ function finishSessie(){
   const cardioType=document.getElementById('cardio-type').value;
   const cardioKcal=Math.round(cardioMin*7);
   const trainKcal=estimateKcal();
-  const duurSec=actSess?Math.floor((Date.now()-actSess.startTime)/1000):0;
 
   const sess={
     id:'sess'+Date.now(),datum:new Date().toISOString(),
     schemaId:actSess.schemaId,schemaNaam:actSess.schemaNaam,spiergroep:actSess.spiergroep,
-    duur:duurSec,sets:actSess.sets,
+    duur:Math.floor((Date.now()-actSess.startTime)/1000),sets:actSess.sets,
     cardioMin,cardioType,
     kcal:trainKcal+cardioKcal,
     gevoel:feelVal,notitie:document.getElementById('eind-notitie').value.trim()
@@ -997,6 +995,27 @@ function migreerArmen(){
   }
   if(changed){saveDB();showToast('Armen oefeningen samengevoegd ✓');renderSchemaPage();}
   else{showToast('Niets te migreren — al up to date ✓');}
+}
+
+/* ── Bibliotheek migratie ── */
+function migreerBibliotheek(){
+  const nieuw={
+    borst:['Bench press','Reverse grip dumb-bells','Close grip dumb-bell press','Wide fly dumb-bells','Cable cross','Chest press 1 1/4','Chest fly','Bench press inclined','Incline dumb-bell press','Chest slide inclined','Low fly inclined'],
+    rug:['Lat pull','Back squeeze','Supinated row','Bent over row','Back fly','Y-raise','Drag shrug','90 hold back squeeze','Gorilla row','Kroc row','Seated row machine'],
+    armen:['Zottman curl','Alternating hammer curl','Drag curl','Cross body curl','Reverse grip curl','Curl','Hammer curl','Concentration curl','Close grip curl','Triceps push down bar','Triceps push down rope','Triceps overhead rope','Triceps push down handle overhand','Triceps pull down handle underhand','Triceps dips bench','Diamond push ups'],
+    schouders:['Bradford press','Scott press','Shrugs','Around the world','Upright row','Punch out','Tip out','T-raise','Arnold press','Rotating reverse grip press dumb-bell','Front raise dumb-bell - slow negative','Front raise disc','Front press disc'],
+    benen:['Squat','Leg press','Calf raise standing','Calf seated leg press machine','Leg extension','Hip abductor','Hip adductor','Seated leg curl','Walking lunge']
+  };
+  let added=0;
+  Object.keys(nieuw).forEach(sg=>{
+    if(!db.bibliotheek[sg])db.bibliotheek[sg]=[];
+    nieuw[sg].forEach(oef=>{
+      if(!db.bibliotheek[sg].includes(oef)){db.bibliotheek[sg].push(oef);added++;}
+    });
+  });
+  saveDB();
+  showToast(added>0?added+' nieuwe oefeningen toegevoegd ✓':'Al up to date ✓');
+  renderSchemaPage();
 }
 
 /* ── Init ── */
