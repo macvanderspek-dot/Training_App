@@ -11,26 +11,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #F7F4EF;
+  --bg: #F0F4F8;
   --surface: #FFFFFF;
-  --surface2: #F0EDE7;
-  --surface3: #E8E4DC;
-  --border: rgba(0,0,0,0.09);
-  --border2: rgba(0,0,0,0.16);
-  --text: #1A1713;
-  --muted: #7A756D;
-  --muted2: #A39D94;
-  --accent: #2E5E4E;
-  --accent-l: #E1F0EB;
-  --accent-m: #5D9E87;
-  --accent2: #8B4513;
-  --accent2-l: #F5E6D8;
-  --danger: #A32D2D;
-  --danger-l: #FCEBEB;
-  --amber: #854F0B;
-  --amber-l: #FAEEDA;
-  --blue: #185FA5;
-  --blue-l: #E6F1FB;
+  --surface2: #E8EFF5;
+  --surface3: #D6E4EE;
+  --border: rgba(0,80,160,0.10);
+  --border2: rgba(0,80,160,0.20);
+  --text: #0F1F2E;
+  --muted: #5A7A94;
+  --muted2: #8AAABB;
+  --accent: #0077CC;
+  --accent-l: #E0F0FF;
+  --accent-m: #3399EE;
+  --accent2: #00997A;
+  --accent2-l: #E0F5F0;
+  --danger: #CC2200;
+  --danger-l: #FDECEA;
+  --amber: #CC7700;
+  --amber-l: #FFF3DC;
+  --blue: #0055AA;
+  --blue-l: #E0EEFF;
   --r: 14px;
   --rs: 9px;
 }
@@ -412,17 +412,11 @@ function defDB(){
     schemas:[],
     sessions:[],
     bibliotheek:{
-      borst:['Bench press','Reverse grip press dumb-bells','Chest press 1 1/4','Chest fly','Close grip press','Wide fly','Low fly inclined','Chest slide inclined'],
-      rug:['Lat pull','Back squeeze','Supinated row','Bent over row','Back fly','Y-raise','Drag shrug','90 hold back squeeze','Gorilla row'],
-      armen:[
-        'Zottman curl','Alternating hammer curl','Drag curl','Cross body curl',
-        'Reverse grip curl','Curl','Hammer curl','Concentration curl',
-        'Triceps push down bar','Triceps push down rope','Triceps overhead rope extension',
-        'Triceps push down handle overhand','Triceps pull down handle underhand',
-        'Triceps dips bench','Diamond push ups'
-      ],
-      schouders:['Bradford press','Scott press','Shrugs','Around the world','Upright row','Punch out','Tip out','T-raise','Arnold press'],
-      benen:['Squatten','Calf raise standing','Leg extension','Hip abductor','Hip adductor','Walking lunge','Seated leg curl']
+      borst:['Bench press','Reverse grip dumb-bells','Close grip dumb-bell press','Wide fly dumb-bells','Cable cross','Chest press 1 1/4','Chest fly','Bench press inclined','Incline dumb-bell press','Chest slide inclined','Low fly inclined'],
+      rug:['Lat pull','Back squeeze','Supinated row','Bent over row','Back fly','Y-raise','Drag shrug','90 hold back squeeze','Gorilla row','Kroc row','Seated row machine'],
+      armen:['Zottman curl','Alternating hammer curl','Drag curl','Cross body curl','Reverse grip curl','Curl','Hammer curl','Concentration curl','Close grip curl','Triceps push down bar','Triceps push down rope','Triceps overhead rope','Triceps push down handle overhand','Triceps pull down handle underhand','Triceps dips bench','Diamond push ups'],
+      schouders:['Bradford press','Scott press','Shrugs','Around the world','Upright row','Punch out','Tip out','T-raise','Arnold press','Rotating reverse grip press dumb-bell','Front raise dumb-bell - slow negative','Front raise disc','Front press disc'],
+      benen:['Squat','Leg press','Calf raise standing','Calf seated leg press machine','Leg extension','Hip abductor','Hip adductor','Seated leg curl','Walking lunge']
     }
   }
 }
@@ -462,7 +456,7 @@ function setWeekChip(){
 /* ═══════════════════════════════════════════
    BIBLIOTHEEK
 ═══════════════════════════════════════════ */
-const sgColors={borst:'#D85A30',rug:'#185FA5',armen:'#854F0B',schouders:'#534AB7',benen:'#2E5E4E'};
+const sgColors={borst:'#E05A20',rug:'#0077CC',armen:'#CC7700',schouders:'#7755CC',benen:'#00997A'};
 const sgList=['borst','rug','armen','schouders','benen'];
 
 function renderBib(){
@@ -661,9 +655,10 @@ function openStartModal(){
 function startSessie(schemaId){
   close_m('m-start');
   const s=db.schemas.find(x=>x.id===schemaId);
-  actSess={schemaId,schemaNaam:s.naam,spiergroep:s.spiergroep,blokA:s.blokA,blokB:s.blokB,blokC:s.blokC,startTime:Date.now(),sets:{},cardioMin:0,cardioType:'loopband',gevoel:3,notitie:''};
+  const now=Date.now();
+  actSess={schemaId,schemaNaam:s.naam,spiergroep:s.spiergroep,blokA:s.blokA,blokB:s.blokB,blokC:s.blokC,startTime:now,sets:{},cardioMin:0,cardioType:'loopband',gevoel:3,notitie:''};
   [...(s.blokA||[]),...(s.blokB||[]),...(s.blokC||[])].forEach(o=>{actSess.sets[o]=[]});
-  timerSec=0;clearInterval(timerInt);timerInt=setInterval(()=>{timerSec++;updTimer()},1000);
+  clearInterval(timerInt);timerInt=setInterval(()=>{updTimer()},1000);
   goto('sessie');
 }
 
@@ -760,16 +755,17 @@ function getPrevSets(oef){
 
 /* ── Kalorie schatting ── */
 function estimateKcal(){
-  // ~5 kcal/min krachtraining + 7 kcal/min cardio, ruwe schatting
-  const trainMin=Math.round(timerSec/60);
+  if(!actSess)return 0;
+  const trainMin=Math.round((Date.now()-actSess.startTime)/60000);
   return Math.round(trainMin*5);
 }
 function updKcal(){const el=document.getElementById('kcal-val');if(el)el.textContent=estimateKcal()}
 
 function updTimer(){
   const el=document.getElementById('timer-num');
-  if(!el)return;
-  const h=Math.floor(timerSec/3600),m=Math.floor((timerSec%3600)/60),s=timerSec%60;
+  if(!el||!actSess)return;
+  const elapsed=Math.floor((Date.now()-actSess.startTime)/1000);
+  const h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60),s=elapsed%60;
   el.textContent=h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`;
   updKcal();
 }
@@ -795,11 +791,12 @@ function finishSessie(){
   const cardioType=document.getElementById('cardio-type').value;
   const cardioKcal=Math.round(cardioMin*7);
   const trainKcal=estimateKcal();
+  const duurSec=actSess?Math.floor((Date.now()-actSess.startTime)/1000):0;
 
   const sess={
     id:'sess'+Date.now(),datum:new Date().toISOString(),
     schemaId:actSess.schemaId,schemaNaam:actSess.schemaNaam,spiergroep:actSess.spiergroep,
-    duur:timerSec,sets:actSess.sets,
+    duur:duurSec,sets:actSess.sets,
     cardioMin,cardioType,
     kcal:trainKcal+cardioKcal,
     gevoel:feelVal,notitie:document.getElementById('eind-notitie').value.trim()
