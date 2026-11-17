@@ -218,6 +218,21 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .empty-ico{font-size:30px;margin-bottom:8px}
 .empty p{font-size:13px;line-height:1.6}
 
+/* ── Cardio protocollen ── */
+.cardio-plan{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.cardio-run{border-radius:var(--rs);padding:14px;text-align:center;margin-top:10px;color:#fff;transition:background .3s}
+.cardio-run.ph-w,.cardio-run.ph-c{background:#5A7A94}
+.cardio-run.ph-i{background:#E05A20}
+.cardio-run.ph-r{background:#0077CC}
+.cardio-run.ph-z{background:#00997A}
+.cr-phase{font-size:15px;font-weight:500}
+.cr-time{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;letter-spacing:2px;line-height:1.2}
+.cr-next{font-size:12px;opacity:.9}
+.cr-bar{height:5px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden;margin:10px 0 4px}
+.cr-fill{height:100%;background:#fff;border-radius:3px}
+.cr-total{font-size:11px;opacity:.85}
+.cardio-klaar{font-size:14px;font-weight:500;margin-top:10px;color:var(--accent2)}
+
 /* ── Cardio blok ── */
 .cardio-row{display:flex;gap:10px;align-items:center;background:var(--surface2);border-radius:var(--rs);padding:10px 12px;margin-top:8px}
 .cardio-ico{font-size:20px}
@@ -657,6 +672,7 @@ function startSessie(schemaId){
   const s=db.schemas.find(x=>x.id===schemaId);
   actSess={schemaId,schemaNaam:s.naam,spiergroep:s.spiergroep,blokA:s.blokA,blokB:s.blokB,blokC:s.blokC,startTime:Date.now(),sets:{},cardioMin:0,cardioType:'loopband',gevoel:3,notitie:''};
   [...(s.blokA||[]),...(s.blokB||[]),...(s.blokC||[])].forEach(o=>{actSess.sets[o]=[]});
+  cardioReset(s.spiergroep);
   timerSec=0;clearInterval(timerInt);timerInt=setInterval(()=>{timerSec++;updTimer()},1000);
   goto('sessie');
 }
@@ -715,15 +731,11 @@ function renderSessie(){
     });
   });
 
-  html+=`<div class="card" style="border-style:dashed;background:transparent;margin-top:8px">
-    <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)">
-      <span style="font-size:20px">🏃</span>
-      <span>Cardio afsluiting instellen bij afronden</span>
-    </div>
-  </div>
+  html+=`<div id="cardio-card"></div>
   <button class="btn btn-p btn-full mt12" style="padding:14px;font-size:15px" onclick="openEind()">Training afronden ›</button>`;
 
   el.innerHTML=html;
+  renderCardio();
   updTimer();
 }
 
@@ -752,6 +764,96 @@ function getPrevSets(oef){
   return prev?prev.sets[oef]:[];
 }
 
+/* ── Cardio protocollen ── */
+const CARDIO={
+  c1:{naam:'Cardio 1: VO2max',kort:'VO2max',
+    plan:'3 min warming-up, 4 x 2 min intensief (RPE 8-9) met 1 min rustig herstel ertussen, 3 min cooling-down.',
+    fases:[
+      {n:'Warming-up',s:180,k:'w'},
+      {n:'Intensief 1 van 4',s:120,k:'i'},{n:'Rustig herstel',s:60,k:'r'},
+      {n:'Intensief 2 van 4',s:120,k:'i'},{n:'Rustig herstel',s:60,k:'r'},
+      {n:'Intensief 3 van 4',s:120,k:'i'},{n:'Rustig herstel',s:60,k:'r'},
+      {n:'Intensief 4 van 4',s:120,k:'i'},
+      {n:'Cooling-down',s:180,k:'c'}]},
+  c2:{naam:'Cardio 2: Zone 2',kort:'Zone 2',
+    plan:'3 min warming-up, 14 min gelijkmatig tempo, 3 min cooling-down.',
+    fases:[
+      {n:'Warming-up',s:180,k:'w'},
+      {n:'Gelijkmatig tempo',s:840,k:'z'},
+      {n:'Cooling-down',s:180,k:'c'}]}
+};
+let cardio={keuze:'vrij',start:null,eind:null,sec:0,klaar:false};
+function cardioDefault(sg){
+  sg=sg||'';
+  if(sg==='schouders')return 'c1';
+  if(sg.indexOf('armen')===0)return 'c2';
+  return 'vrij';
+}
+function cardioReset(sg){cardio={keuze:cardioDefault(sg),start:null,eind:null,sec:0,klaar:false}}
+function cardioTotSec(k){return CARDIO[k].fases.reduce(function(a,f){return a+f.s},0)}
+function fmtMS(sec){sec=Math.max(0,Math.round(sec));return pad(Math.floor(sec/60))+':'+pad(sec%60)}
+function fmtKort(s){return s%60===0?(s/60)+' min':s+' sec'}
+
+function cardioSetKeuze(v){
+  if(cardio.start&&!cardio.eind)return;
+  cardio={keuze:v,start:null,eind:null,sec:0,klaar:false};
+  renderCardio();
+}
+function cardioStart(){cardio.start=Date.now();cardio.eind=null;cardio.sec=0;cardio.klaar=false;renderCardio()}
+function cardioStop(){
+  if(!cardio.start||cardio.eind)return;
+  cardio.eind=Date.now();
+  cardio.sec=Math.min(Math.floor((cardio.eind-cardio.start)/1000),cardioTotSec(cardio.keuze));
+  cardio.klaar=false;
+  renderCardio();
+}
+function cardioOpnieuw(){cardio.start=null;cardio.eind=null;cardio.sec=0;cardio.klaar=false;renderCardio()}
+
+function renderCardio(){
+  const el=document.getElementById('cardio-card');
+  if(!el||!actSess)return;
+  const k=cardio.keuze;
+  const lopend=cardio.start&&!cardio.eind;
+  let h='<div class="card" style="margin-top:8px"><div class="card-hd"><div><div class="card-title" style="font-size:15px">🏃 Cardio afsluiting</div><div class="card-sub">Crosstrainer</div></div></div>';
+  h+='<select '+(lopend?'disabled ':'')+'onchange="cardioSetKeuze(this.value)">'
+    +'<option value="c1"'+(k==='c1'?' selected':'')+'>Cardio 1: VO2max ('+Math.round(cardioTotSec('c1')/60)+' min)</option>'
+    +'<option value="c2"'+(k==='c2'?' selected':'')+'>Cardio 2: Zone 2 ('+Math.round(cardioTotSec('c2')/60)+' min)</option>'
+    +'<option value="vrij"'+(k==='vrij'?' selected':'')+'>Vrije cardio (invullen bij afronden)</option>'
+    +'<option value="geen"'+(k==='geen'?' selected':'')+'>Geen cardio</option></select>';
+  if(CARDIO[k]){
+    if(!cardio.start){
+      h+='<div class="cardio-plan">'+CARDIO[k].plan+'</div><button class="btn btn-p btn-full mt8" onclick="cardioStart()">Start cardio</button>';
+    }else if(lopend){
+      h+='<div id="cardio-run" class="cardio-run"></div><button class="btn btn-d btn-full mt8" onclick="cardioStop()">Stop cardio</button>';
+    }else{
+      h+='<div class="cardio-klaar">'+(cardio.klaar?'✓ Cardio voltooid: ':'Gestopt na ')+fmtMS(cardio.sec)+'</div><button class="btn btn-full mt8" onclick="cardioOpnieuw()">Opnieuw</button>';
+    }
+  }else if(k==='vrij'){
+    h+='<div class="cardio-plan">Je vult minuten en type in bij het afronden.</div>';
+  }
+  h+='</div>';
+  el.innerHTML=h;
+  updCardio();
+}
+
+function updCardio(){
+  const box=document.getElementById('cardio-run');
+  if(!box||!cardio.start||cardio.eind||!CARDIO[cardio.keuze])return;
+  const def=CARDIO[cardio.keuze];
+  const tot=cardioTotSec(cardio.keuze);
+  const el=Math.floor((Date.now()-cardio.start)/1000);
+  if(el>=tot){cardio.eind=cardio.start+tot*1000;cardio.sec=tot;cardio.klaar=true;renderCardio();return}
+  let t=0,idx=0;
+  for(;idx<def.fases.length;idx++){if(el<t+def.fases[idx].s)break;t+=def.fases[idx].s}
+  const f=def.fases[idx],next=def.fases[idx+1];
+  box.className='cardio-run ph-'+f.k;
+  box.innerHTML='<div class="cr-phase">'+f.n+'</div>'
+    +'<div class="cr-time">'+fmtMS(t+f.s-el)+'</div>'
+    +'<div class="cr-next">'+(next?'Straks: '+next.n+' ('+fmtKort(next.s)+')':'Laatste fase')+'</div>'
+    +'<div class="cr-bar"><div class="cr-fill" style="width:'+Math.round(el/tot*100)+'%"></div></div>'
+    +'<div class="cr-total">'+fmtMS(el)+' van '+fmtMS(tot)+'</div>';
+}
+
 /* ── Kalorie schatting ── */
 function estimateKcal(){
   if(!actSess)return 0;
@@ -767,6 +869,7 @@ function updTimer(){
   const h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60),s=elapsed%60;
   el.textContent=h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`;
   updKcal();
+  updCardio();
 }
 function pad(n){return String(n).padStart(2,'0')}
 
@@ -778,7 +881,15 @@ function openEind(){
   document.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('on'));
   document.querySelector('.feel-btn[data-v="3"]').classList.add('on');
   document.getElementById('eind-notitie').value='';
-  document.getElementById('cardio-min').value='15';
+  if(cardio.start&&!cardio.eind)cardioStop();
+  if(CARDIO[cardio.keuze]){
+    document.getElementById('cardio-min').value=cardio.start?Math.round(cardio.sec/60):0;
+    document.getElementById('cardio-type').value='crosstrainer';
+  }else if(cardio.keuze==='geen'){
+    document.getElementById('cardio-min').value=0;
+  }else{
+    document.getElementById('cardio-min').value='15';
+  }
   open_m('m-eind');
 }
 function setFeel(v){feelVal=v;document.querySelectorAll('.feel-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)===v))}
@@ -790,17 +901,22 @@ function finishSessie(){
   const cardioType=document.getElementById('cardio-type').value;
   const cardioKcal=Math.round(cardioMin*7);
   const trainKcal=estimateKcal();
+  const proto=(CARDIO[cardio.keuze]&&cardio.start)?cardio.keuze:null;
+  const totMin=Math.round((Date.now()-actSess.startTime)/60000);
+  const kcalTotaal=proto?Math.round(Math.max(0,totMin-cardioMin)*5+cardioKcal):trainKcal+cardioKcal;
 
   const sess={
     id:'sess'+Date.now(),datum:new Date().toISOString(),
     schemaId:actSess.schemaId,schemaNaam:actSess.schemaNaam,spiergroep:actSess.spiergroep,
     duur:Math.floor((Date.now()-actSess.startTime)/1000),sets:actSess.sets,
     cardioMin,cardioType,
-    kcal:trainKcal+cardioKcal,
+    cardioProto:proto,cardioKlaar:!!(proto&&cardio.klaar),
+    kcal:kcalTotaal,
     gevoel:feelVal,notitie:document.getElementById('eind-notitie').value.trim()
   };
   db.sessions.push(sess);saveDB();
   actSess=null;timerSec=0;
+  cardioReset('');
   close_m('m-eind');
   document.getElementById('fab').textContent='+';
   goto('dashboard');
@@ -849,7 +965,7 @@ function renderDash(){
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="hist-name">${s.schemaNaam}</div>
-          <div class="hist-meta">${dur}${s.kcal?` · ${s.kcal} kcal`:''}${s.cardioMin?` · 🏃 ${s.cardioMin}m ${s.cardioType}`:''}${s.gevoel?' · '+feel[s.gevoel]:''}</div>
+          <div class="hist-meta">${dur}${s.kcal?` · ${s.kcal} kcal`:''}${s.cardioMin?` · 🏃 ${s.cardioMin}m ${s.cardioType}${s.cardioProto&&CARDIO[s.cardioProto]?' ('+CARDIO[s.cardioProto].kort+')':''}`:''}${s.gevoel?' · '+feel[s.gevoel]:''}</div>
           ${s.notitie?`<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${s.notitie}"</div>`:''}
         </div>
         <button class="btn btn-ghost btn-sm" onclick="delSess('${s.id}')">✕</button>
@@ -930,8 +1046,32 @@ function renderProg(){
 /* ═══════════════════════════════════════════
    BACKUP & RESTORE
 ═══════════════════════════════════════════ */
+/* Oefeningenlijst terugzetten: voegt alleen toe, verwijdert nooit.
+   Bronnen: de bibliotheek in de backup (nieuwe backups) en oefeningen uit schema's en sessies (ook oude backups). */
+function mergeBibliotheek(data){
+  if(!db.bibliotheek)db.bibliotheek={};
+  function norm(sg){return (sg||'').indexOf('armen')===0?'armen':sg}
+  function voeg(sg,naam){
+    sg=norm(sg);
+    if(!sg||!naam||!db.bibliotheek.hasOwnProperty(sg))return;
+    if(db.bibliotheek[sg].indexOf(naam)<0)db.bibliotheek[sg].push(naam);
+  }
+  var b=data.bibliotheek||{};
+  Object.keys(b).forEach(function(sg){
+    var key=norm(sg);
+    if(!db.bibliotheek[key])db.bibliotheek[key]=[];
+    (b[sg]||[]).forEach(function(o){voeg(key,o)});
+  });
+  (data.schemas||[]).forEach(function(s){
+    [].concat(s.blokA||[],s.blokB||[],s.blokC||[]).forEach(function(o){voeg(s.spiergroep,o)});
+  });
+  (data.sessions||[]).forEach(function(s){
+    Object.keys(s.sets||{}).forEach(function(o){voeg(s.spiergroep,o)});
+  });
+}
+
 function exportData(){
-  const payload={exportDatum:new Date().toISOString(),versie:'v2',data:{schemas:db.schemas,sessions:db.sessions}};
+  const payload={exportDatum:new Date().toISOString(),versie:'v2',data:{schemas:db.schemas,sessions:db.sessions,bibliotheek:db.bibliotheek}};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -956,6 +1096,7 @@ function importData(){
         if(!confirm('Backup van '+d+' terugzetten?\n\nJe huidige data wordt overschreven.'))return;
         db.schemas=parsed.data.schemas||[];
         db.sessions=parsed.data.sessions||[];
+        mergeBibliotheek(parsed.data);
         saveDB();
         showToast('Backup teruggezet ✓');
         renderDash();
